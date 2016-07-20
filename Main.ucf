@@ -1,0 +1,12 @@
+// Implementation Contraints File for Nexys4 DDR Artix-7 FPGA
+
+// Clock
+NET "CLK_100M" LOC = E3 | IOSTANDARD = LVCMOS33;
+NET "CLK_100M" PERIOD = 10ns HIGH 5ns;
+
+// LEDs
+NET "LED" LOC = H17 | IOSTANDARD = LVCMOS33 | TIG;
+
+// Audio Jack
+NET "AUD_PWM" LOC = A11 | IOSTANDARD = LVCMOS33 | TIG;
+NET "AUD_SD" LOC = D12 | IOSTANDARD = LVCMOS33 | TIG;
