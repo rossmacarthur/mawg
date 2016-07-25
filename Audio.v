@@ -1,7 +1,7 @@
-module Audio(
+module Audio (
     input clk,
-    input [7:0] value,
-    output reg AUD_PWM
+    input [7:0] value, // the input amplitude
+    output reg AUD_PWM // the pin to PWM
 );
 
 reg [7:0] count;
