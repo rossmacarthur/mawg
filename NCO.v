@@ -1,107 +1,283 @@
-// Numerically Controlled Oscillator
-// Author: Ross MacArthur
-// Generates a synchronous discrete-time, discrete-valued sinusoid
-// frequency = clock speed / (frequency control * 2^S)
-
 module NCO (
     input clk,
-    input reset,
-    input [15:0] control, // frequency control word
-    output reg [7:0] amplitude // output amplitude of wave
+    input enable,
+    input [7:0] phaseinc,
+    output [7:0] sinval,
+    output [7:0] cosval
 );
 
-parameter S = 8; // 2**S samples (need to generate new LUT to change this)
+reg [7:0] value;
+reg [7:0] phase;
 
-// Phase Accumulator
-reg [15:0] count; // to divide clock down to sample freq
-reg [S-1:0] phase; // current position in period
-reg [S-3:0] select; // based on phase to pick amplitude value
-reg [7:0] value; // positive amplitude value
+assign sinval = value;
+assign cosval = ~value;
 
-always @(posedge clk)
-    if (reset) begin
-        count <= 0;
+always @(posedge clk) begin
+    if (~enable) begin
         phase <= 0;
-        amplitude <= 0;
     end else begin
-        if (count >= control) begin
-            count <= 1'b0;
-            phase <= phase + 1'b1;
-        end else
-            count <= count + 1'b1;
-
-        // To deal with only Quarter Sine LUT
-        select <= phase[S-2] ? ~(phase[S-3:0]-1'b1) : phase[S-3:0];
-        amplitude <= (phase[S-2] & ~|phase[S-3:0]) ? (phase[S-1] ? 8'h0 : 8'hFF) : (phase[S-1] ? ~value : value);
+        phase <= phase + phaseinc;
     end
+end
 
-// Quarter Sine Look-up Table
 always @(*) begin
-    case(select)
-        6'h00 : value <= 8'h80;
-        6'h01 : value <= 8'h83;
-        6'h02 : value <= 8'h86;
-        6'h03 : value <= 8'h89;
-        6'h04 : value <= 8'h8C;
-        6'h05 : value <= 8'h8F;
-        6'h06 : value <= 8'h92;
-        6'h07 : value <= 8'h95;
-        6'h08 : value <= 8'h98;
-        6'h09 : value <= 8'h9B;
-        6'h0A : value <= 8'h9E;
-        6'h0B : value <= 8'hA2;
-        6'h0C : value <= 8'hA5;
-        6'h0D : value <= 8'hA7;
-        6'h0E : value <= 8'hAA;
-        6'h0F : value <= 8'hAD;
-        6'h10 : value <= 8'hB0;
-        6'h11 : value <= 8'hB3;
-        6'h12 : value <= 8'hB6;
-        6'h13 : value <= 8'hB9;
-        6'h14 : value <= 8'hBC;
-        6'h15 : value <= 8'hBE;
-        6'h16 : value <= 8'hC1;
-        6'h17 : value <= 8'hC4;
-        6'h18 : value <= 8'hC6;
-        6'h19 : value <= 8'hC9;
-        6'h1A : value <= 8'hCB;
-        6'h1B : value <= 8'hCE;
-        6'h1C : value <= 8'hD0;
-        6'h1D : value <= 8'hD3;
-        6'h1E : value <= 8'hD5;
-        6'h1F : value <= 8'hD7;
-        6'h20 : value <= 8'hDA;
-        6'h21 : value <= 8'hDC;
-        6'h22 : value <= 8'hDE;
-        6'h23 : value <= 8'hE0;
-        6'h24 : value <= 8'hE2;
-        6'h25 : value <= 8'hE4;
-        6'h26 : value <= 8'hE6;
-        6'h27 : value <= 8'hE8;
-        6'h28 : value <= 8'hEA;
-        6'h29 : value <= 8'hEB;
-        6'h2A : value <= 8'hED;
-        6'h2B : value <= 8'hEE;
-        6'h2C : value <= 8'hF0;
-        6'h2D : value <= 8'hF1;
-        6'h2E : value <= 8'hF3;
-        6'h2F : value <= 8'hF4;
-        6'h30 : value <= 8'hF5;
-        6'h31 : value <= 8'hF6;
-        6'h32 : value <= 8'hF8;
-        6'h33 : value <= 8'hF9;
-        6'h34 : value <= 8'hFA;
-        6'h35 : value <= 8'hFA;
-        6'h36 : value <= 8'hFB;
-        6'h37 : value <= 8'hFC;
-        6'h38 : value <= 8'hFD;
-        6'h39 : value <= 8'hFD;
-        6'h3A : value <= 8'hFE;
-        6'h3B : value <= 8'hFE;
-        6'h3C : value <= 8'hFE;
-        6'h3D : value <= 8'hFF;
-        6'h3E : value <= 8'hFF;
-        6'h3F : value <= 8'hFF;
+    case(phase)
+        8'h00 : value <= 8'h80;
+        8'h01 : value <= 8'h83;
+        8'h02 : value <= 8'h86;
+        8'h03 : value <= 8'h89;
+        8'h04 : value <= 8'h8C;
+        8'h05 : value <= 8'h8F;
+        8'h06 : value <= 8'h92;
+        8'h07 : value <= 8'h95;
+        8'h08 : value <= 8'h98;
+        8'h09 : value <= 8'h9B;
+        8'h0A : value <= 8'h9E;
+        8'h0B : value <= 8'hA2;
+        8'h0C : value <= 8'hA5;
+        8'h0D : value <= 8'hA7;
+        8'h0E : value <= 8'hAA;
+        8'h0F : value <= 8'hAD;
+        8'h10 : value <= 8'hB0;
+        8'h11 : value <= 8'hB3;
+        8'h12 : value <= 8'hB6;
+        8'h13 : value <= 8'hB9;
+        8'h14 : value <= 8'hBC;
+        8'h15 : value <= 8'hBE;
+        8'h16 : value <= 8'hC1;
+        8'h17 : value <= 8'hC4;
+        8'h18 : value <= 8'hC6;
+        8'h19 : value <= 8'hC9;
+        8'h1A : value <= 8'hCB;
+        8'h1B : value <= 8'hCE;
+        8'h1C : value <= 8'hD0;
+        8'h1D : value <= 8'hD3;
+        8'h1E : value <= 8'hD5;
+        8'h1F : value <= 8'hD7;
+        8'h20 : value <= 8'hDA;
+        8'h21 : value <= 8'hDC;
+        8'h22 : value <= 8'hDE;
+        8'h23 : value <= 8'hE0;
+        8'h24 : value <= 8'hE2;
+        8'h25 : value <= 8'hE4;
+        8'h26 : value <= 8'hE6;
+        8'h27 : value <= 8'hE8;
+        8'h28 : value <= 8'hEA;
+        8'h29 : value <= 8'hEB;
+        8'h2A : value <= 8'hED;
+        8'h2B : value <= 8'hEE;
+        8'h2C : value <= 8'hF0;
+        8'h2D : value <= 8'hF1;
+        8'h2E : value <= 8'hF3;
+        8'h2F : value <= 8'hF4;
+        8'h30 : value <= 8'hF5;
+        8'h31 : value <= 8'hF6;
+        8'h32 : value <= 8'hF8;
+        8'h33 : value <= 8'hF9;
+        8'h34 : value <= 8'hFA;
+        8'h35 : value <= 8'hFA;
+        8'h36 : value <= 8'hFB;
+        8'h37 : value <= 8'hFC;
+        8'h38 : value <= 8'hFD;
+        8'h39 : value <= 8'hFD;
+        8'h3A : value <= 8'hFE;
+        8'h3B : value <= 8'hFE;
+        8'h3C : value <= 8'hFE;
+        8'h3D : value <= 8'hFF;
+        8'h3E : value <= 8'hFF;
+        8'h3F : value <= 8'hFF;
+        8'h40 : value <= 8'hFF;
+        8'h41 : value <= 8'hFF;
+        8'h42 : value <= 8'hFF;
+        8'h43 : value <= 8'hFF;
+        8'h44 : value <= 8'hFE;
+        8'h45 : value <= 8'hFE;
+        8'h46 : value <= 8'hFE;
+        8'h47 : value <= 8'hFD;
+        8'h48 : value <= 8'hFD;
+        8'h49 : value <= 8'hFC;
+        8'h4A : value <= 8'hFB;
+        8'h4B : value <= 8'hFA;
+        8'h4C : value <= 8'hFA;
+        8'h4D : value <= 8'hF9;
+        8'h4E : value <= 8'hF8;
+        8'h4F : value <= 8'hF6;
+        8'h50 : value <= 8'hF5;
+        8'h51 : value <= 8'hF4;
+        8'h52 : value <= 8'hF3;
+        8'h53 : value <= 8'hF1;
+        8'h54 : value <= 8'hF0;
+        8'h55 : value <= 8'hEE;
+        8'h56 : value <= 8'hED;
+        8'h57 : value <= 8'hEB;
+        8'h58 : value <= 8'hEA;
+        8'h59 : value <= 8'hE8;
+        8'h5A : value <= 8'hE6;
+        8'h5B : value <= 8'hE4;
+        8'h5C : value <= 8'hE2;
+        8'h5D : value <= 8'hE0;
+        8'h5E : value <= 8'hDE;
+        8'h5F : value <= 8'hDC;
+        8'h60 : value <= 8'hDA;
+        8'h61 : value <= 8'hD7;
+        8'h62 : value <= 8'hD5;
+        8'h63 : value <= 8'hD3;
+        8'h64 : value <= 8'hD0;
+        8'h65 : value <= 8'hCE;
+        8'h66 : value <= 8'hCB;
+        8'h67 : value <= 8'hC9;
+        8'h68 : value <= 8'hC6;
+        8'h69 : value <= 8'hC4;
+        8'h6A : value <= 8'hC1;
+        8'h6B : value <= 8'hBE;
+        8'h6C : value <= 8'hBC;
+        8'h6D : value <= 8'hB9;
+        8'h6E : value <= 8'hB6;
+        8'h6F : value <= 8'hB3;
+        8'h70 : value <= 8'hB0;
+        8'h71 : value <= 8'hAD;
+        8'h72 : value <= 8'hAA;
+        8'h73 : value <= 8'hA7;
+        8'h74 : value <= 8'hA5;
+        8'h75 : value <= 8'hA2;
+        8'h76 : value <= 8'h9E;
+        8'h77 : value <= 8'h9B;
+        8'h78 : value <= 8'h98;
+        8'h79 : value <= 8'h95;
+        8'h7A : value <= 8'h92;
+        8'h7B : value <= 8'h8F;
+        8'h7C : value <= 8'h8C;
+        8'h7D : value <= 8'h89;
+        8'h7E : value <= 8'h86;
+        8'h7F : value <= 8'h83;
+        8'h80 : value <= 8'h80;
+        8'h81 : value <= 8'h7C;
+        8'h82 : value <= 8'h79;
+        8'h83 : value <= 8'h76;
+        8'h84 : value <= 8'h73;
+        8'h85 : value <= 8'h70;
+        8'h86 : value <= 8'h6D;
+        8'h87 : value <= 8'h6A;
+        8'h88 : value <= 8'h67;
+        8'h89 : value <= 8'h64;
+        8'h8A : value <= 8'h61;
+        8'h8B : value <= 8'h5D;
+        8'h8C : value <= 8'h5A;
+        8'h8D : value <= 8'h58;
+        8'h8E : value <= 8'h55;
+        8'h8F : value <= 8'h52;
+        8'h90 : value <= 8'h4F;
+        8'h91 : value <= 8'h4C;
+        8'h92 : value <= 8'h49;
+        8'h93 : value <= 8'h46;
+        8'h94 : value <= 8'h43;
+        8'h95 : value <= 8'h41;
+        8'h96 : value <= 8'h3E;
+        8'h97 : value <= 8'h3B;
+        8'h98 : value <= 8'h39;
+        8'h99 : value <= 8'h36;
+        8'h9A : value <= 8'h34;
+        8'h9B : value <= 8'h31;
+        8'h9C : value <= 8'h2F;
+        8'h9D : value <= 8'h2C;
+        8'h9E : value <= 8'h2A;
+        8'h9F : value <= 8'h28;
+        8'hA0 : value <= 8'h25;
+        8'hA1 : value <= 8'h23;
+        8'hA2 : value <= 8'h21;
+        8'hA3 : value <= 8'h1F;
+        8'hA4 : value <= 8'h1D;
+        8'hA5 : value <= 8'h1B;
+        8'hA6 : value <= 8'h19;
+        8'hA7 : value <= 8'h17;
+        8'hA8 : value <= 8'h15;
+        8'hA9 : value <= 8'h14;
+        8'hAA : value <= 8'h12;
+        8'hAB : value <= 8'h11;
+        8'hAC : value <= 8'h0F;
+        8'hAD : value <= 8'h0E;
+        8'hAE : value <= 8'h0C;
+        8'hAF : value <= 8'h0B;
+        8'hB0 : value <= 8'h0A;
+        8'hB1 : value <= 8'h09;
+        8'hB2 : value <= 8'h07;
+        8'hB3 : value <= 8'h06;
+        8'hB4 : value <= 8'h05;
+        8'hB5 : value <= 8'h05;
+        8'hB6 : value <= 8'h04;
+        8'hB7 : value <= 8'h03;
+        8'hB8 : value <= 8'h02;
+        8'hB9 : value <= 8'h02;
+        8'hBA : value <= 8'h01;
+        8'hBB : value <= 8'h01;
+        8'hBC : value <= 8'h01;
+        8'hBD : value <= 8'h00;
+        8'hBE : value <= 8'h00;
+        8'hBF : value <= 8'h00;
+        8'hC0 : value <= 8'h00;
+        8'hC1 : value <= 8'h00;
+        8'hC2 : value <= 8'h00;
+        8'hC3 : value <= 8'h00;
+        8'hC4 : value <= 8'h01;
+        8'hC5 : value <= 8'h01;
+        8'hC6 : value <= 8'h01;
+        8'hC7 : value <= 8'h02;
+        8'hC8 : value <= 8'h02;
+        8'hC9 : value <= 8'h03;
+        8'hCA : value <= 8'h04;
+        8'hCB : value <= 8'h05;
+        8'hCC : value <= 8'h05;
+        8'hCD : value <= 8'h06;
+        8'hCE : value <= 8'h07;
+        8'hCF : value <= 8'h09;
+        8'hD0 : value <= 8'h0A;
+        8'hD1 : value <= 8'h0B;
+        8'hD2 : value <= 8'h0C;
+        8'hD3 : value <= 8'h0E;
+        8'hD4 : value <= 8'h0F;
+        8'hD5 : value <= 8'h11;
+        8'hD6 : value <= 8'h12;
+        8'hD7 : value <= 8'h14;
+        8'hD8 : value <= 8'h15;
+        8'hD9 : value <= 8'h17;
+        8'hDA : value <= 8'h19;
+        8'hDB : value <= 8'h1B;
+        8'hDC : value <= 8'h1D;
+        8'hDD : value <= 8'h1F;
+        8'hDE : value <= 8'h21;
+        8'hDF : value <= 8'h23;
+        8'hE0 : value <= 8'h25;
+        8'hE1 : value <= 8'h28;
+        8'hE2 : value <= 8'h2A;
+        8'hE3 : value <= 8'h2C;
+        8'hE4 : value <= 8'h2F;
+        8'hE5 : value <= 8'h31;
+        8'hE6 : value <= 8'h34;
+        8'hE7 : value <= 8'h36;
+        8'hE8 : value <= 8'h39;
+        8'hE9 : value <= 8'h3B;
+        8'hEA : value <= 8'h3E;
+        8'hEB : value <= 8'h41;
+        8'hEC : value <= 8'h43;
+        8'hED : value <= 8'h46;
+        8'hEE : value <= 8'h49;
+        8'hEF : value <= 8'h4C;
+        8'hF0 : value <= 8'h4F;
+        8'hF1 : value <= 8'h52;
+        8'hF2 : value <= 8'h55;
+        8'hF3 : value <= 8'h58;
+        8'hF4 : value <= 8'h5A;
+        8'hF5 : value <= 8'h5D;
+        8'hF6 : value <= 8'h61;
+        8'hF7 : value <= 8'h64;
+        8'hF8 : value <= 8'h67;
+        8'hF9 : value <= 8'h6A;
+        8'hFA : value <= 8'h6D;
+        8'hFB : value <= 8'h70;
+        8'hFC : value <= 8'h73;
+        8'hFD : value <= 8'h76;
+        8'hFE : value <= 8'h79;
+        8'hFF : value <= 8'h7C;
     endcase
 end
 
