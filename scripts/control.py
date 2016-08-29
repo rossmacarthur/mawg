@@ -7,14 +7,10 @@ import click
 @click.command()
 @click.argument('freq', type=float)
 @click.option('--clock', '-c', default=100000000)
-@click.option('--samples', type=click.IntRange(1, 16), default=10)
-def main(freq, clock, samples):
-    control = int(clock / (freq * 2**samples) + .5)
-    if control > 65536 or control < 1:
-        print 'Frequency out of range'
-    else:
-        print 'A frequency of {} with a clock of {} requires a control word of {} ({:b})'.format(
-            freq, clock, control, control)
+def main(freq, clock):
+    control = int(round(freq * 2**32 / clock))
+    print 'A frequency of {} with a clock of {} requires a control word of {} (0b{:b}, 0x{:X})'.format(
+            freq, clock, control, control, control)
 
 if __name__ == "__main__":
     main()

@@ -1,34 +1,29 @@
-// Clock divided full LUT NCO (sine output only)
+// Phase incremented full LUT NCO (sine output only)
 // Author: Ross MacArthur
-//   16-bit input control word
+//   32-bit input phase increment control
 //   8-bit signed output amplitude
-//   frequency = clk / (control * 256)
+//   frequency = clk * control / 2^32
 
 module NCO (
     input clk,
     input reset,
-    input [15:0] control,       // frequency control word
+    input [31:0] control,      // frequency control word
     output reg [7:0] amplitude // signed output amplitude of wave
 );
 
-// Clock Divider and Phase Accumulator
-reg [15:0] count;   // to divide clock down to sample freq
-reg [7:0] phase;    // current position in period
+// Phase Accumulator
+reg [31:0] phase;
 
 always @(posedge clk) begin
     if (reset) begin
-        count <= 0;
-        phase <= 0;
-    end else if (count == control) begin
-        count <= 1'b0;
-        phase <= phase + 1'b1;
+        phase <= 32'h0;
     end else
-        count <= count + 1'b1;
+        phase <= phase + control;
 end
 
 // Full Sine Look-up Table
 always @(*) begin
-    case(phase)
+    case(phase[31:24])
         8'h00 : amplitude <= 8'h00;
         8'h01 : amplitude <= 8'h03;
         8'h02 : amplitude <= 8'h06;
