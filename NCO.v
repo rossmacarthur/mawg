@@ -1,24 +1,25 @@
-// Phase incremented quarter LUT NCO
+// Sine and cosine wave generator module
+// Phase incremented quarter LUT Numerically Controlled Oscillator
 // Author: Ross MacArthur
-//   32-bit input phase increment control
 //   8-bit signed output amplitude
-//   frequency = clk * control / 2^32
+//   32-bit input frequency control
+//   frequency = clk * ctrl / 2^32
 
 module NCO (
     input clk,
     input reset,
     input [31:0] ctrl,        // frequency control word
-    output reg [7:0] sin_out, // signed output amplitude of sine wave
-    output reg [7:0] cos_out  // signed output amplitude of cosine wave
+    output reg [7:0] sin_out, // signed amplitude of sine wave
+    output reg [7:0] cos_out  // signed amplitude of cosine wave
 );
 
 // Phase Accumulator
 reg [31:0] phase;
 
 always @(posedge clk) begin
-    if (reset) begin
+    if (reset)
         phase <= 32'h0;
-    end else
+    else
         phase <= phase + ctrl;
 end
 
@@ -36,7 +37,7 @@ always @(*) begin
         cos_out <= 8'b00000000;
     end else begin
         sin_out <= phase[31] ? (~sin_lut_val+1'b1) : sin_lut_val;
-        cos_out <= (phase[31] ^ phase[30]) ? (~cos_lut_val+1'b1) : cos_lut_val;
+        cos_out <= (phase[31]^phase[30]) ? (~cos_lut_val+1'b1) : cos_lut_val;
     end
     
     case(sin_lut_sel)
