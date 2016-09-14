@@ -32,7 +32,7 @@ FMModulator FMModulator0 (
     .clk       ( CLK_100M  ), // input
     .message   ( message   ), // input [7:0]
     .ctr_ctrl  ( 32'h1F751 ), // input [31:0]
-    .deviation ( SW[4:0]   ), // input [4:0]
+    .deviation ( 5'b01000  ), // input [4:0]
     .modulated ( modulated )  // output [7:0]
 );
 

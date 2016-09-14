@@ -8,8 +8,9 @@ module FMDemodulator (
 wire [31:0] smp_rate;
 wire [7:0] sin_out;
 wire [7:0] xored;
+wire [7:0] demod;
 assign xored = sin_out ^ modulated;
-assign demodulated = {~xored[7], xored[6:0]};
+assign demod = {~xored[7], xored[6:0]};
 
 NCO NCO0 (
     .clk     ( clk      ),
@@ -18,6 +19,13 @@ NCO NCO0 (
     .ctrl    ( ctr_ctrl ),
     .sin_out ( sin_out  )
   //.cos_out ( cos_out  )
+);
+
+BlockAverager BlockAverager0 (
+    .clk      ( clk         ),
+    .phase    ( smp_rate    ),
+    .signal   ( demod       ),
+    .filtered ( demodulated )
 );
 
 endmodule
