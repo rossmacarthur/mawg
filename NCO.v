@@ -9,12 +9,13 @@ module NCO (
     input clk,
     input reset,
     input [31:0] ctrl,        // frequency control word
+    output reg [31:0] phase,
     output reg [7:0] sin_out, // signed amplitude of sine wave
     output reg [7:0] cos_out  // signed amplitude of cosine wave
 );
 
 // Phase Accumulator
-reg [31:0] phase;
+//reg [31:0] phase;
 
 always @(posedge clk) begin
     if (reset)
