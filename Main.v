@@ -20,12 +20,19 @@ always @(*) begin
 end
 
 // Connect up modules
-NCO NCO0 (
-    .clk     ( CLK_100M ), // input
-    .reset   ( 1'b0     ), // input
-    .ctrl    ( 32'h49D2 ), // input [31:0]
-    .sin_out ( message  )  // output [7:0]
-  //.cos_out ( cos_out )   // output [7:0]
+WaveGenerator WaveGenerator0 (
+    .clk              ( CLK_100M     ), // input
+    .wave_sel         ( SW[13:12]    ), // input [1:0]
+    .freq_ctrl        ( 32'h49D2     ), // input [31:0]
+    .chirp_is_down    ( 1'b0         ), // input
+    .chirp_delay      ( 4'b11        ), // input [3:0]
+    .chirp_min_ctrl   ( 32'h24E9     ), // input [31:0]
+    .chirp_max_ctrl   ( 32'h49D2     ), // input [31:0]
+    .chirp_inc_rate   ( 32'h554      ), // input [31:0]
+    .chirp_div_rate   ( 32'h1606D3   ), // input [31:0]
+    .pulse_duty_cycle ( 32'h3FFFFFFF ), // input [31:0]
+    .wave_out         ( message      )  // output [7:0]
+//  .wave2_out        (              )  // output [7:0]
 );
 
 FMModulator FMModulator0 (

@@ -5,25 +5,25 @@ module FMDemodulator (
     output [7:0] demodulated // signed FM demodulated output
 );
 
-wire [31:0] smp_rate;
-wire [7:0] sin_out;
+wire [31:0] nco_phase;
+wire [7:0] nco_out;
 wire [7:0] xored;
 wire [7:0] demod;
-assign xored = sin_out ^ modulated;
+assign xored = nco_out ^ modulated;
 assign demod = {~xored[7], xored[6:0]};
 
-NCO NCO0 (
-    .clk     ( clk      ),
-    .reset   ( 1'b0     ),
-    .phase   ( smp_rate ),
-    .ctrl    ( ctr_ctrl ),
-    .sin_out ( sin_out  )
-  //.cos_out ( cos_out  )
+// Connect up modules
+NCO_fm NCO_fm0 (
+    .clk     ( clk       ),
+    .reset   ( 1'b0      ),
+    .ctrl    ( ctr_ctrl  ),
+    .phase   ( nco_phase ),
+    .sin_out ( nco_out   )
 );
 
 BlockAverager BlockAverager0 (
     .clk      ( clk         ),
-    .phase    ( smp_rate    ),
+    .phase    ( nco_phase   ),
     .signal   ( demod       ),
     .filtered ( demodulated )
 );
