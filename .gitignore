@@ -1,10 +1,17 @@
 # Python
 *.pyc
 
-# Created by https://www.gitignore.io/api/xilinxise
 
 ### XilinxISE ###
 # intermediate build files
+
+*.wdb
+*.exe
+*.ini
+*.log
+*.wcfg
+*.cmd
+*.xmsgs
 *.bgn
 *.bit
 *.bld
@@ -66,6 +73,8 @@ webtalk.log
 webtalk_pn.xml
 
 # generated folders
+isim/
+ipcore_dir/
 iseconfig/
 xlnx_auto_0_xdb/
 xst/

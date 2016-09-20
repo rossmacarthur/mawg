@@ -1,58 +1,54 @@
 module Main (
-    input CLK_100M,
+    input CLK,
     input [15:0] SW,
     output AUD_PWM,
-    output reg AUD_SD=1'b1
+    output reg AUD_SD=1'b1,
+    output SYNC,
+    output DATA,
+    output SCLK
 );
 
-// Select output
-wire [7:0] message;
-wire [7:0] modulated;
-wire [7:0] demodulated;
-reg [7:0] to_audio;
-always @(*) begin
-    if (SW[15:14] == 2'b0)
-        to_audio <= message;
-    else if (SW[15:14] == 2'b01)
-        to_audio <= modulated;
-    else
-        to_audio <= demodulated;
-end
+wire CLK_100M;
+wire CLK_50M;
+wire CLK_75M;
+wire CLK_85M;
+
+wire [7:0] sin_out;
+wire [11:0] signal;
+wire [31:0] control;
+
+assign control = SW[15:5] << SW[4:0];
+assign signal = {~sin_out[7], sin_out[6:0]} << 4;
 
 // Connect up modules
-WaveGenerator WaveGenerator0 (
-    .clk              ( CLK_100M     ), // input
-    .wave_sel         ( SW[13:12]    ), // input [1:0]
-    .freq_ctrl        ( 32'h49D2     ), // input [31:0]
-    .chirp_is_down    ( 1'b0         ), // input
-    .chirp_delay      ( 4'b11        ), // input [3:0]
-    .chirp_min_ctrl   ( 32'h24E9     ), // input [31:0]
-    .chirp_max_ctrl   ( 32'h49D2     ), // input [31:0]
-    .chirp_inc_rate   ( 32'h554      ), // input [31:0]
-    .chirp_div_rate   ( 32'h1606D3   ), // input [31:0]
-    .pulse_duty_cycle ( 32'h3FFFFFFF ), // input [31:0]
-    .wave_out         ( message      )  // output [7:0]
-//  .wave2_out        (              )  // output [7:0]
+Clock_Generator Clock_Gen (
+    .CLK_IN1  ( CLK      ), // input
+    .CLK_OUT1 ( CLK_100M ), // output
+    .CLK_OUT2 ( CLK_50M  ), // output
+	 .CLK_OUT3 ( CLK_75M  ), // output
+	 .CLK_OUT4 ( CLK_85M  )  // output
 );
 
-FMModulator FMModulator0 (
-    .clk       ( CLK_100M  ), // input
-    .message   ( message   ), // input [7:0]
-    .ctr_ctrl  ( 32'h1F751 ), // input [31:0]
-    .deviation ( 5'b01000  ), // input [4:0]
-    .modulated ( modulated )  // output [7:0]
+NCO NCO0 (
+    .clk     ( CLK_100M ), // input
+    .rst     ( 1'b0     ), // input
+    .ctrl    ( control  ), // input [31:0]
+    .sin_out ( sin_out  )  // output [7:0]
+  //.cos_out ( cos_out  )
 );
 
-FMDemodulator FMDemodulator0 (
-    .clk         ( CLK_100M    ), // input
-    .modulated   ( modulated   ), // input [7:0]
-    .ctr_ctrl    ( 32'h1F751   ), // input [31:0]
-    .demodulated ( demodulated )  // output [7:0]
+PmodDA4_Control PmodDA4_Control0 (
+    .clk     ( CLK_75M ), // input
+	 .rst     ( 1'b0    ), // input
+	 .signal  ( signal  ), // input [11:0]
+	 .SYNC    ( SYNC    ), // output
+	 .DATA    ( DATA    ), // output
+	 .SCLK    ( SCLK    )  // output
 );
 
 Audio Audio0 (
     .clk     ( CLK_100M ), // input
-    .value   ( to_audio ), // input [3:0]
+    .value   ( sin_out  ), // input [7:0]
     .AUD_PWM ( AUD_PWM  )  // output
 );
 

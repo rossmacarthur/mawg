@@ -7,7 +7,7 @@
 
 module NCO_fm (
     input clk,
-    input reset,
+    input rst,
     input [31:0] ctrl,        // frequency control word
     output reg [31:0] phase,  // current phase word
     output reg [7:0] sin_out  // signed amplitude of sine wave
@@ -15,7 +15,7 @@ module NCO_fm (
 
 // Phase Accumulator
 always @(posedge clk) begin
-    if (reset)
+    if (rst)
         phase <= 32'h0;
     else
         phase <= phase + ctrl;

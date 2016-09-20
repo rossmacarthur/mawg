@@ -7,7 +7,7 @@
 
 module NCO (
     input clk,
-    input reset,
+    input rst,
     input [31:0] ctrl,        // frequency control word
     output reg [7:0] sin_out, // signed amplitude of sine wave
     output reg [7:0] cos_out  // signed amplitude of cosine wave
@@ -17,7 +17,7 @@ module NCO (
 reg [31:0] phase;
 
 always @(posedge clk) begin
-    if (reset)
+    if (rst)
         phase <= 32'h0;
     else
         phase <= phase + ctrl;
