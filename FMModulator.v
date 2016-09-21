@@ -14,7 +14,7 @@ assign crr_ctrl = ctr_ctrl + (emessage <<< deviation);
 // Connect up modules
 NCO_fm NCO_fm0 (
     .clk     ( clk       ),
-    .reset   ( 1'b0      ),
+    .rst     ( 1'b0      ),
     .ctrl    ( crr_ctrl  ),
   //.phase   ( nco_phase ),
     .sin_out ( modulated )

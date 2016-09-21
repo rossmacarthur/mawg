@@ -51,7 +51,7 @@ end
 // Connect up modules
 NCO NCO0 (
     .clk     ( clk       ), // input
-    .reset   ( nco_reset ), // input
+    .rst     ( nco_reset ), // input
     .ctrl    ( nco_ctrl  ), // input [31:0]
     .sin_out ( sin_out   ), // output [7:0]
     .cos_out ( cos_out   )  // output [7:0]

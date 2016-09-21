@@ -15,7 +15,7 @@ assign demod = {~xored[7], xored[6:0]};
 // Connect up modules
 NCO_fm NCO_fm0 (
     .clk     ( clk       ),
-    .reset   ( 1'b0      ),
+    .rst     ( 1'b0      ),
     .ctrl    ( ctr_ctrl  ),
     .phase   ( nco_phase ),
     .sin_out ( nco_out   )
