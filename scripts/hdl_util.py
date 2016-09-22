@@ -51,16 +51,16 @@ def ctrl_to_freq(ctrl, clk=100000000, phase_bits=32):
     return ctrl * clk / 2**phase_bits
 
 
-def create_lut(sbits, rbits, wave, padding=4, name='lut_value', signed=True, full=False):
-    S = 2**sbits-2
+def create_lut(sbits, rbits, wave, padding=4, name='lut_value', unsigned=False, full=False):
+    S = 2**sbits
 
     func = sin if wave == 'sin' else cos
 
     for s in range((S if full else S//4)):
-        if signed:
-            v = disc((2**(rbits-1)-1) * (func(2*pi*s/S)))
-        else:
+        if unsigned:
             v = disc((2**(rbits)-1) * (func(2*pi*s/S)+1)/2)
+        else:
+            v = disc((2**(rbits-1)-1) * (func(2*pi*s/S)))
 
         if full:
             print(' '*padding + '{:d}\'h{:0{}X} : {} <= {:d}\'h{:0{}X};'.format(

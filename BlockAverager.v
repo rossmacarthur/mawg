@@ -1,23 +1,24 @@
 module BlockAverager (
-    input clk,
+    input clk
     input [31:0] phase,        // current phase of center frequency signal
-    input [7:0] signal,        // signed amplitude of signal
-    output reg [7:0] filtered  // signed amplitude of filtered wave
+	 input [4:0] sample_rate,   // sample rate to demodulate
+    input [15:0] signal,       // signed amplitude of signal
+    output reg [15:0] filtered // signed amplitude of filtered wave
 );
 
 reg prev_phase;
-reg [15:0] buff [63:0];
-reg [21:0] sum;
+reg [37:0] buff [63:0];
+reg [37:0] sum;
 
 integer i;
 always @(posedge clk) begin
-    if (phase[27] ^ prev_phase) begin
-        prev_phase <= phase[27];
-        buff[0] <= {{8{signal[7]}}, signal};
+    if (phase[sample_rate] ^ prev_phase) begin
+        prev_phase <= phase[sample_rate];
+        buff[0] <= {{22{signal[15]}}, signal};
         for (i = 63; i > 0; i=i-1) begin
             buff[i] <= buff[i-1];
         end 
-        sum<= buff[0] + buff[1] + buff[2] + buff[3] + 
+        sum <= buff[0] + buff[1] + buff[2] + buff[3] + 
               buff[4] + buff[5] + buff[6] + buff[7] + 
               buff[8] + buff[9] + buff[10] + buff[11] + 
               buff[12] + buff[13] + buff[14] + buff[15] +
@@ -33,7 +34,7 @@ always @(posedge clk) begin
               buff[52] + buff[53] + buff[54] + buff[55] +
               buff[56] + buff[57] + buff[58] + buff[59] +
               buff[60] + buff[61] + buff[62] + buff[63];
-        filtered <= {sum >>> 6}[7:0];
+        filtered <= {sum >>> 6}[15:0];
     end
 end
 

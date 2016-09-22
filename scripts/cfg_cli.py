@@ -68,7 +68,7 @@ def cli():
 
 @cli.command()
 @click.argument('output', type=click.Choice(['message', 'modulated', 'demodulated']))
-def sel_out(output):
+def select(output):
     configure(0x0, ['message', 'modulated', 'demodulated'].index(output))
 
 
@@ -130,11 +130,20 @@ def pulse(freq, duty):
 @cli.command()
 @click.argument('ctr_freq', type=float)
 @click.argument('dev_freq', type=float)
-def fm(ctr_freq, dev_freq):
+@click.option('--demod_rate', '-r', type=BasedInt(), default='0x1d')
+def fm(ctr_freq, dev_freq, demod_rate):
     ctr_ctrl = freq_to_ctrl(ctr_freq)
     dev_ctrl = freq_to_ctrl(dev_freq)
+    configure(0xC, demod_rate)
+    configure(0xB, int(log(dev_ctrl, 2))+1)
     configure(0xA, ctr_ctrl)
-    configure(0xB, int(log(dev_ctrl/127, 2)))
+    configure(0x0, 0x2)
+
+
+@cli.command()
+@click.argument('cmd', type=BasedInt())
+def flip(cmd):
+    configure(0xD, cmd)
 
 
 @cli.command()
@@ -147,6 +156,64 @@ def reset():
 @click.argument('data', type=BasedInt())
 def manual(cmd, data):
     configure(cmd, data)
+
+
+def note(freq, length):
+    configure(0x2, freq_to_ctrl(freq))
+    time.sleep(0.3*length)
+
+
+@cli.command()
+def fun():
+
+    # for freq in range(200000, 1000, -1000):
+    #     configure(0x2, freq_to_ctrl(freq))
+    configure(0x1, 0x3)
+    C = 2093.00
+    D = 2349.32
+    E = 2637.02
+    F = 2793.83
+    G = 3135.96
+    A = 3520.00
+    B = 3951.07
+    C2 = 4186.01
+
+    # N = 0
+    # C = 523.25
+    # D = 587.33
+    # E = 659.25
+    # F = 698.46
+    # G = 783.99
+    # A = 880.00
+    # B = 987.77
+    # C2 = 1046.50
+
+    while True:
+        note(C2, 2)
+        note(C, 2)
+        note(D, 0.5)
+        note(E, 0.5)
+        note(F, 0.5)
+        note(E, 0.5)
+        note(D, 2)
+        note(E, 0.5)
+        note(F, 0.5)
+        note(G, 0.5)
+        note(F, 0.5)
+        note(E, 2)
+        note(F, 0.5)
+        note(G, 0.5)
+        note(A, 0.5)
+        note(G, 0.5)
+        note(F, 0.5)
+        note(G, 0.5)
+        note(A, 0.5)
+        note(B, 0.5)
+        # note(C2, 1)
+        # note(N, 0.0001)
+        # note(C2, 1)
+        # note(N, 0.0001)
+
 
 
 if __name__ == "__main__":

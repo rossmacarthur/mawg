@@ -51,7 +51,7 @@ def nco_values(freq, clk, verilog):
 @click.option('--name', '-n', type=str, default='value')
 @click.option('--unsigned', '-u', is_flag=True)
 @click.option('--full', '-f', is_flag=True)
-def generate_lut(sample_bits, res_bits, wave, padding, name, signed, full):
+def generate_lut(sample_bits, res_bits, wave, padding, name, unsigned, full):
     """
     Prints out a sinusoidal LUT in Verilog
 
@@ -59,7 +59,7 @@ def generate_lut(sample_bits, res_bits, wave, padding, name, signed, full):
     RESOLUTION_BITS is the number of bits used to represent the resolution.
     WAVE is the sinusoidal waveform (sin or cos)
     """
-    create_lut(sample_bits, res_bits, wave, padding=padding, name=name, signed=signed, full=full)
+    create_lut(sample_bits, res_bits, wave, padding=padding, name=name, unsigned=unsigned, full=full)
 
 
 if __name__ == "__main__":

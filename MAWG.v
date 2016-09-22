@@ -11,21 +11,22 @@ module MAWG (
    input [31:0] chirp_div_rate,
 	input [31:0] pulse_duty_cycle,
 	input [31:0] fm_ctr_ctrl,
-	input [4:0] fm_deviation,
-	output reg [7:0] signal
+	input [7:0] fm_deviation,
+	input [4:0] fm_demod_rate,
+	output reg [15:0] signal
 );
 
 // Select FM message, modulated or demodulated
-wire [7:0] message; 
-wire [7:0] modulated;
-wire [7:0] demodulated;
+wire [15:0] message; 
+wire [15:0] modulated;
+wire [15:0] demodulated;
 
 always @(posedge clk) begin
 	case(out_sel)
 		2'b00 : signal <= message;
 		2'b01 : signal <= modulated;
 		2'b10 : signal <= demodulated;
-		2'b11 : signal <= 8'b0;
+		default : signal <= 16'h0;
 	endcase
 end
 
@@ -41,23 +42,24 @@ WaveGenerator WaveGenerator0 (
     .chirp_inc_rate   ( chirp_inc_rate   ), // input [31:0]
     .chirp_div_rate   ( chirp_div_rate   ), // input [31:0]
     .pulse_duty_cycle ( pulse_duty_cycle ), // input [31:0]
-    .wave_out         ( message          )  // output [7:0]
-//  .wave2_out        (                  )  // output [7:0]
+    .wave_out         ( message          )  // output [15:0]
+//  .wave2_out        (                  )  // output [15:0]
 );
 
 FMModulator FMModulator0 (
     .clk       ( clk          ), // input
-    .message   ( message      ), // input [7:0]
+    .message   ( message      ), // input [15:0]
     .ctr_ctrl  ( fm_ctr_ctrl  ), // input [31:0]
-    .deviation ( fm_deviation ), // input [4:0]
-    .modulated ( modulated    )  // output [7:0]
+    .deviation ( fm_deviation ), // input [7:0]
+    .modulated ( modulated    )  // output [15:0]
 );
 
 FMDemodulator FMDemodulator0 (
-    .clk         ( clk         ), // input
-    .modulated   ( modulated   ), // input [7:0]
-    .ctr_ctrl    ( fm_ctr_ctrl ), // input [31:0]
-    .demodulated ( demodulated )  // output [7:0]
+    .clk         ( clk           ), // input
+    .modulated   ( modulated     ), // input [15:0]
+    .ctr_ctrl    ( fm_ctr_ctrl   ), // input [31:0]
+	 .sample_rate ( fm_demod_rate ), // input [4:0]
+    .demodulated ( demodulated   )  // output [15:0]
 );
 
 endmodule

@@ -1,16 +1,17 @@
 module FMDemodulator (
     input clk,
-    input [7:0] modulated,   // signed modulated input
-    input [31:0] ctr_ctrl,   // frequency control for center modulating frequency
-    output [7:0] demodulated // signed FM demodulated output
+    input [15:0] modulated,   // signed modulated input
+    input [31:0] ctr_ctrl,    // frequency control for center modulating frequency
+	 input [4:0] sample_rate,  // rate to take samples for demodulation
+    output [15:0] demodulated // signed FM demodulated output
 );
 
 wire [31:0] nco_phase;
-wire [7:0] nco_out;
-wire [7:0] xored;
-wire [7:0] demod;
+wire [15:0] nco_out;
+wire [15:0] xored;
+wire [15:0] demod;
 assign xored = nco_out ^ modulated;
-assign demod = {~xored[7], xored[6:0]};
+assign demod = {~xored[15], xored[14:0]};
 
 // Connect up modules
 NCO_fm NCO_fm0 (
@@ -22,10 +23,11 @@ NCO_fm NCO_fm0 (
 );
 
 BlockAverager BlockAverager0 (
-    .clk      ( clk         ),
-    .phase    ( nco_phase   ),
-    .signal   ( demod       ),
-    .filtered ( demodulated )
+    .clk         ( clk         ),
+    .phase       ( nco_phase   ),
+	 .sample_rate ( sample_rate ),
+    .signal      ( demod       ),
+    .filtered    ( demodulated )
 );
 
 endmodule

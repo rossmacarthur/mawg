@@ -1,6 +1,6 @@
 // Arbitrary waveform generator module
 // Author: Ross MacArthur
-//   8-bit signed output amplitude
+//   16-bit signed output amplitude
 //   four different waveforms:
 //     wave_sel at 0b00 generates sine and cosine at wave_out and wave2_out
 //     wave_sel at 0b01 generates chirp at wave_out
@@ -18,8 +18,8 @@ module WaveGenerator (
     input [31:0] chirp_inc_rate,   // proportional frequency rate control word
     input [31:0] chirp_div_rate,   // inversely proportional frequency rate control word
     input [31:0] pulse_duty_cycle, // duty cycle of pulse waveform
-    output reg [7:0] wave_out,     // waveform output pins
-    output reg [7:0] wave2_out     // second waveform output pins (only used to output cosine)
+    output reg [15:0] wave_out,    // waveform output pins
+    output reg [15:0] wave2_out    // second waveform output pins (only used to output cosine)
 );
 
 // submodule inputs
@@ -31,18 +31,17 @@ wire [31:0] pulse_ctrl;
 // submodule outputs
 wire chirp_nco_reset;
 wire [31:0] chirp_nco_ctrl;
-wire [7:0] sin_out;
-wire [7:0] cos_out;
-wire [7:0] saw_out;
-wire [7:0] pulse_out;
+wire [15:0] sin_out;
+wire [15:0] cos_out;
+wire [15:0] saw_out;
+wire [15:0] pulse_out;
 
 always @(posedge clk) begin
-    wave2_out <= (wave_out == 2'b00) ? cos_out : 8'h0;
+    wave2_out <= (wave_out == 2'b00) ? cos_out : 16'h0;
     nco_ctrl <= wave_sel[0] ? chirp_nco_ctrl : freq_ctrl;
     nco_reset <= wave_sel[0] ? chirp_nco_reset : 1'b0;
     case(wave_sel)
-        2'b00 : wave_out <= sin_out; 
-        2'b01 : wave_out <= sin_out; 
+        2'b00, 2'b01 : wave_out <= sin_out; 
         2'b10 : wave_out <= saw_out;
         2'b11 : wave_out <= pulse_out;
     endcase
@@ -53,8 +52,8 @@ NCO NCO0 (
     .clk     ( clk       ), // input
     .rst     ( nco_reset ), // input
     .ctrl    ( nco_ctrl  ), // input [31:0]
-    .sin_out ( sin_out   ), // output [7:0]
-    .cos_out ( cos_out   )  // output [7:0]
+    .sin_out ( sin_out   ), // output [15:0]
+    .cos_out ( cos_out   )  // output [15:0]
 );
 
 Chirp Chirp0 (
@@ -72,14 +71,14 @@ Chirp Chirp0 (
 Sawtooth Sawtooth0 (
     .clk   ( clk       ), // input
     .ctrl  ( freq_ctrl ), // input [31:0]
-    .value ( saw_out   )  // input [7:0]
+    .value ( saw_out   )  // input [15:0]
 );
 
 Pulse Pulse0 (
     .clk   ( clk              ), // input
     .ctrl  ( freq_ctrl        ), // input [31:0]
     .duty  ( pulse_duty_cycle ), // input [31:0]
-    .value ( pulse_out        )  // output [7:0]
+    .value ( pulse_out        )  // output [15:0]
 );
 
 endmodule
