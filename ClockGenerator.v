@@ -1,4 +1,4 @@
-// file: Clock_Generator.v
+// file: ClockGenerator.v
 // 
 // (c) Copyright 2008 - 2011 Xilinx, Inc. All rights reserved.
 // 
@@ -55,10 +55,9 @@
 // "Output    Output      Phase     Duty      Pk-to-Pk        Phase"
 // "Clock    Freq (MHz) (degrees) Cycle (%) Jitter (ps)  Error (ps)"
 //----------------------------------------------------------------------------
-// CLK_OUT1___100.000______0.000______50.0______105.942_____80.549
-// CLK_OUT2____50.000______0.000______50.0______120.564_____80.549
-// CLK_OUT3____75.000______0.000______50.0______111.625_____80.549
-// CLK_OUT4____84.375______0.000______50.0______109.260_____80.549
+// CLK_OUT1___100.000______0.000______50.0______115.831_____87.180
+// CLK_OUT2____75.000______0.000______50.0______122.158_____87.180
+// CLK_OUT3____16.000______0.000______50.0______171.072_____87.180
 //
 //----------------------------------------------------------------------------
 // "Input Clock   Freq (MHz)    Input Jitter (UI)"
@@ -67,15 +66,14 @@
 
 `timescale 1ps/1ps
 
-(* CORE_GENERATION_INFO = "Clock_Generator,clk_wiz_v3_6,{component_name=Clock_Generator,use_phase_alignment=true,use_min_o_jitter=false,use_max_i_jitter=false,use_dyn_phase_shift=false,use_inclk_switchover=false,use_dyn_reconfig=false,feedback_source=FDBK_AUTO,primtype_sel=MMCM_ADV,num_out_clk=4,clkin1_period=10.000,clkin2_period=10.000,use_power_down=false,use_reset=false,use_locked=false,use_inclk_stopped=false,use_status=false,use_freeze=false,use_clk_valid=false,feedback_type=SINGLE,clock_mgr_type=MANUAL,manual_override=false}" *)
-module Clock_Generator
+(* CORE_GENERATION_INFO = "ClockGenerator,clk_wiz_v3_6,{component_name=ClockGenerator,use_phase_alignment=true,use_min_o_jitter=false,use_max_i_jitter=false,use_dyn_phase_shift=false,use_inclk_switchover=false,use_dyn_reconfig=false,feedback_source=FDBK_AUTO,primtype_sel=MMCM_ADV,num_out_clk=3,clkin1_period=10.000,clkin2_period=10.000,use_power_down=false,use_reset=false,use_locked=false,use_inclk_stopped=false,use_status=false,use_freeze=false,use_clk_valid=false,feedback_type=SINGLE,clock_mgr_type=MANUAL,manual_override=false}" *)
+module ClockGenerator
  (// Clock in ports
   input         CLK_IN1,
   // Clock out ports
   output        CLK_OUT1,
   output        CLK_OUT2,
-  output        CLK_OUT3,
-  output        CLK_OUT4
+  output        CLK_OUT3
  );
 
   // Input buffering
@@ -100,6 +98,7 @@ module Clock_Generator
   wire        clkout0b_unused;
   wire        clkout1b_unused;
   wire        clkout2b_unused;
+  wire        clkout3_unused;
   wire        clkout3b_unused;
   wire        clkout4_unused;
   wire        clkout5_unused;
@@ -113,25 +112,21 @@ module Clock_Generator
     .COMPENSATION         ("ZHOLD"),
     .STARTUP_WAIT         ("FALSE"),
     .DIVCLK_DIVIDE        (1),
-    .CLKFBOUT_MULT_F      (13.500),
+    .CLKFBOUT_MULT_F      (12.000),
     .CLKFBOUT_PHASE       (0.000),
     .CLKFBOUT_USE_FINE_PS ("FALSE"),
-    .CLKOUT0_DIVIDE_F     (13.500),
+    .CLKOUT0_DIVIDE_F     (12.000),
     .CLKOUT0_PHASE        (0.000),
     .CLKOUT0_DUTY_CYCLE   (0.500),
     .CLKOUT0_USE_FINE_PS  ("FALSE"),
-    .CLKOUT1_DIVIDE       (27),
+    .CLKOUT1_DIVIDE       (16),
     .CLKOUT1_PHASE        (0.000),
     .CLKOUT1_DUTY_CYCLE   (0.500),
     .CLKOUT1_USE_FINE_PS  ("FALSE"),
-    .CLKOUT2_DIVIDE       (18),
+    .CLKOUT2_DIVIDE       (75),
     .CLKOUT2_PHASE        (0.000),
     .CLKOUT2_DUTY_CYCLE   (0.500),
     .CLKOUT2_USE_FINE_PS  ("FALSE"),
-    .CLKOUT3_DIVIDE       (16),
-    .CLKOUT3_PHASE        (0.000),
-    .CLKOUT3_DUTY_CYCLE   (0.500),
-    .CLKOUT3_USE_FINE_PS  ("FALSE"),
     .CLKIN1_PERIOD        (10.000),
     .REF_JITTER1          (0.010))
   mmcm_adv_inst
@@ -144,7 +139,7 @@ module Clock_Generator
     .CLKOUT1B            (clkout1b_unused),
     .CLKOUT2             (clkout2),
     .CLKOUT2B            (clkout2b_unused),
-    .CLKOUT3             (clkout3),
+    .CLKOUT3             (clkout3_unused),
     .CLKOUT3B            (clkout3b_unused),
     .CLKOUT4             (clkout4_unused),
     .CLKOUT5             (clkout5_unused),
@@ -193,10 +188,6 @@ module Clock_Generator
   BUFG clkout3_buf
    (.O   (CLK_OUT3),
     .I   (clkout2));
-
-  BUFG clkout4_buf
-   (.O   (CLK_OUT4),
-    .I   (clkout3));
 
 
 

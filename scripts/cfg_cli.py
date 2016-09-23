@@ -141,12 +141,6 @@ def fm(ctr_freq, dev_freq, demod_rate):
 
 
 @cli.command()
-@click.argument('cmd', type=BasedInt())
-def flip(cmd):
-    configure(0xD, cmd)
-
-
-@cli.command()
 def reset():
     configure(0xF, 0x0)
 
@@ -159,61 +153,103 @@ def manual(cmd, data):
 
 
 def note(freq, length):
-    configure(0x2, freq_to_ctrl(freq))
+    configure(0x2, freq_to_ctrl(0.9*freq))
     time.sleep(0.3*length)
 
 
 @cli.command()
 def fun():
 
-    # for freq in range(200000, 1000, -1000):
-    #     configure(0x2, freq_to_ctrl(freq))
     configure(0x1, 0x3)
-    C = 2093.00
-    D = 2349.32
-    E = 2637.02
-    F = 2793.83
-    G = 3135.96
-    A = 3520.00
-    B = 3951.07
-    C2 = 4186.01
 
-    # N = 0
-    # C = 523.25
-    # D = 587.33
-    # E = 659.25
-    # F = 698.46
-    # G = 783.99
-    # A = 880.00
-    # B = 987.77
-    # C2 = 1046.50
+    N = 0
+    C1 = 523.25
+    D1 = 587.33
+    E1 = 659.25
+    F1 = 698.46
+    G1 = 783.99
+    A1 = 880.00
+    B1 = 987.77
+
+    C2 = 1046.50
+    D2 = 1174.66
+    E2 = 1318.51
+    F2 = 1396.91
+    G2 = 1567.98
+    A2 = 1760.00
+    B2 = 1975.53
+    C3 = 2093.00
+    D3 = 2349.32
+    E3 = 2637.02
+    F3 = 2793.83
+    G3 = 3135.96
+    A3 = 3520.00
+    B3 = 3951.07
+    C4 = 4186.01
 
     while True:
         note(C2, 2)
-        note(C, 2)
-        note(D, 0.5)
-        note(E, 0.5)
-        note(F, 0.5)
-        note(E, 0.5)
-        note(D, 2)
-        note(E, 0.5)
-        note(F, 0.5)
-        note(G, 0.5)
-        note(F, 0.5)
-        note(E, 2)
-        note(F, 0.5)
-        note(G, 0.5)
-        note(A, 0.5)
-        note(G, 0.5)
-        note(F, 0.5)
-        note(G, 0.5)
-        note(A, 0.5)
-        note(B, 0.5)
-        # note(C2, 1)
-        # note(N, 0.0001)
-        # note(C2, 1)
-        # note(N, 0.0001)
+        note(C1, 2)
 
+        note(D1, 0.66)
+        note(E1, 0.333)
+        note(F1, 0.666)
+        note(E1, 0.333)
+        note(D1, 2)
+
+        note(E1, 0.666)
+        note(F1, 0.333)
+        note(G1, 0.666)
+        note(F1, 0.333)
+        note(E1, 2)
+
+        note(F1, 0.666)
+        note(G1, 0.333)
+        note(A1, 0.666)
+        note(G1, 0.333)
+        note(F1, 0.666)
+        note(G1, 0.333)
+        note(A1, 0.666)
+        note(B1, 0.333)
+
+        note(C2, 1)
+        note(N, 0.0001)
+        note(C2, 1)
+        note(N, 0.0001)
+        note(C2, 2)
+
+        note(C2, 0.666)
+        note(N, 0.0001)
+        note(C2, 0.333)
+        note(B1, 0.666)
+        note(A1, 0.333)
+        note(B1, 0.666)
+        note(C2, 0.333)
+        note(D2, 1)
+
+        note(E2, 1)
+        note(N, 0.0001)
+        note(E2, 1)
+        note(N, 0.0001)
+        note(E2, 2.666)
+        note(N, 0.0001)
+        note(E2, 0.333)
+
+        note(D2, 0.666)
+        note(C2, 0.333)
+        note(D2, 0.666)
+        note(E2, 0.333)
+        note(F2, 1)
+
+        note(G2, 2)
+        note(C2, 2)
+
+        note(C2, 0.666)
+        note(A2, 0.333)
+        note(G2, 0.666)
+        note(F2, 0.333)
+        note(E2, 1)
+        note(D2, 1)
 
 
 if __name__ == "__main__":
