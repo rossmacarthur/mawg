@@ -16,7 +16,7 @@ module NCO_fm (
 // Phase Accumulator
 always @(posedge clk) begin
   if (rst)
-    phase <= 32'h0;
+    phase <= 32'b0;
   else
     phase <= phase + ctrl;
 end

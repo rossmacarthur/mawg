@@ -44,9 +44,6 @@ reg [31:0] buff;
 
 always @(posedge CLK_1M) begin
   if (btn_rst) begin
-    state <= 3'b0;
-    cmd <= 8'b0;
-    buff <= 32'b0;
     mawg_out <= 2'b0;
     mawg_wave <= 2'b0;
     mawg_ctrl <= 32'b0;
@@ -60,6 +57,9 @@ always @(posedge CLK_1M) begin
     mawg_fm_ctr_ctrl <= 32'b0;
     mawg_fm_deviation <= 8'b0;
     mawg_fm_demod_rate <= 5'b0;
+    state <= 3'b0;
+    cmd <= 8'b0;
+    buff <= 32'b0;
   end else begin
     prev_busy <= uart_busy;
     if (~uart_busy & prev_busy) begin
@@ -69,33 +69,33 @@ always @(posedge CLK_1M) begin
       else if (state <= 3'd3)
         buff <= { buff[23:0], uart_data };
       else begin
-        if (cmd == 8'h0)
+        if (cmd == 8'd0)
           mawg_out <= uart_data[1:0];
-        else if (cmd == 8'h1)
+        else if (cmd == 8'd1)
           mawg_wave <= uart_data[1:0];
-        else if (cmd == 8'h2)
+        else if (cmd == 8'd2)
           mawg_ctrl <= { buff[23:0], uart_data };
-        else if (cmd == 8'h3)
+        else if (cmd == 8'd3)
           mawg_chirp_is_down <= uart_data[0];
-        else if (cmd == 8'h4)
+        else if (cmd == 8'd4)
           mawg_chirp_delay <= uart_data[3:0];
-        else if (cmd == 8'h5)
+        else if (cmd == 8'd5)
           mawg_chirp_min_ctrl <= { buff[23:0], uart_data };
-        else if (cmd == 8'h6)
+        else if (cmd == 8'd6)
           mawg_chirp_max_ctrl <= { buff[23:0], uart_data };
-        else if (cmd == 8'h7)
+        else if (cmd == 8'd7)
           mawg_chirp_div_rate <= { buff[23:0], uart_data };
-        else if (cmd == 8'h8)
+        else if (cmd == 8'd8)
           mawg_chirp_inc_rate <= { buff[23:0], uart_data };
-        else if (cmd == 8'h9)
+        else if (cmd == 8'd9)
           mawg_pulse_duty_cycle <= { buff[23:0], uart_data };
-        else if (cmd == 8'hA)
+        else if (cmd == 8'd10)
           mawg_fm_ctr_ctrl <= { buff[23:0], uart_data };
-        else if (cmd == 8'hB)
+        else if (cmd == 8'd11)
           mawg_fm_deviation <= uart_data;
-        else if (cmd == 8'hC)
+        else if (cmd == 8'd12)
           mawg_fm_demod_rate <= uart_data[4:0];
-        else if (cmd == 8'hF) begin
+        else if (cmd == 8'd15) begin
           mawg_out <= 2'b0;
           mawg_wave <= 2'b0;
           mawg_ctrl <= 32'b0;
@@ -116,12 +116,12 @@ always @(posedge CLK_1M) begin
 end
 
 // Setup PmodDA4 and audio jack outputs
-wire [15:0] signal;
+wire [15:0] signal0;
 wire [11:0] to_pmod;
 wire [7:0] to_audio;
 
-assign to_pmod = {~signal[15], signal[14:4]};
-assign to_audio = {~signal[15], signal[14:8]};
+assign to_pmod = {~signal0[15], signal0[14:4]};
+assign to_audio = {~signal0[15], signal0[14:8]};
 
 // Connect up modules
 ClockGenerator ClockGenerator0 (
@@ -161,7 +161,8 @@ MAWG MAWG0 (
   .fm_ctr_ctrl      ( mawg_fm_ctr_ctrl       ), // input [31:0]
   .fm_deviation     ( mawg_fm_deviation      ), // input [7:0]
   .fm_demod_rate    ( mawg_fm_demod_rate     ), // input [4:0]
-  .signal           ( signal                 )  // output [7:0]
+  .signal0          ( signal0                )  // output [15:0]
+//.signal1          ( signal1                )  // output [15:0]
 );
 
 PmodDA4_Control PmodDA4_Control0 (

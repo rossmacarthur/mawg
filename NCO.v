@@ -18,7 +18,7 @@ reg [31:0] phase;
 
 always @(posedge clk) begin
   if (rst)
-    phase <= 32'h0;
+    phase <= 32'b0;
   else
     phase <= phase + ctrl;
 end
@@ -171,7 +171,7 @@ always @(*) begin
     6'h3C : cos_lut_val <= 16'h0C8C;
     6'h3D : cos_lut_val <= 16'h096A;
     6'h3E : cos_lut_val <= 16'h0648;
-    6'h3F : cos_lut_val <= 16'h0324;   
+    6'h3F : cos_lut_val <= 16'h0324;
   endcase
 end
 

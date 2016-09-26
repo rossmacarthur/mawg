@@ -1,3 +1,7 @@
+// PWM output to audio jack
+// Continuously outputs the input value using PWM to the audio jack PWM pin
+// Author: Ross MacArthur
+
 module Audio_Control (
   input clk,
   input rst,

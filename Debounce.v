@@ -14,7 +14,7 @@ reg d1, d2, d3;
 
 always @(posedge clk) begin
   if (&counter) begin
-    counter <= 0;
+    counter <= 19'b0;
     d1 <= noisy;
     d2 <= d1;
     d3 <= d2;

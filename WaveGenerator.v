@@ -2,10 +2,10 @@
 // Author: Ross MacArthur
 //   16-bit signed output amplitude
 //   Four different waveforms:
-//     wave_sel at 0b00 generates sine and cosine at wave_out and wave2_out
-//     wave_sel at 0b01 generates chirp at wave_out
-//     wave_sel at 0b10 generates sawtooth at wave_out
-//     wave_sel at 0b11 generates pulse at wave_out
+//     wave_sel at 0b00 generates sine and cosine at waveform0 and waveform1
+//     wave_sel at 0b01 generates chirp at waveform0
+//     wave_sel at 0b10 generates sawtooth at waveform0
+//     wave_sel at 0b11 generates pulse at waveform0
 
 module WaveGenerator (
   input clk,
@@ -19,8 +19,8 @@ module WaveGenerator (
   input [31:0] chirp_inc_rate,   // proportional frequency rate control word
   input [31:0] chirp_div_rate,   // inversely proportional frequency rate control word
   input [31:0] pulse_duty_cycle, // duty cycle of pulse waveform
-  output reg [15:0] wave_out,    // waveform output pins
-  output reg [15:0] wave2_out    // second waveform output pins (only used to output cosine)
+  output reg [15:0] waveform0,   // waveform output pins
+  output reg [15:0] waveform1    // second waveform output pins (only used to output cosine)
 );
 
 // Submodule inputs
@@ -36,13 +36,13 @@ wire [15:0] saw_out;
 wire [15:0] pulse_out;
 
 always @(posedge clk) begin
-  wave2_out <= (wave_out == 2'b00) ? cos_out : 16'b0;
+  waveform1 <= (wave_sel == 2'b00) ? cos_out : 16'b0;
   nco_ctrl <= wave_sel[0] ? chirp_nco_ctrl : freq_ctrl;
   nco_reset <= wave_sel[0] ? chirp_nco_reset : rst;
   case(wave_sel)
-    2'b00, 2'b01 : wave_out <= sin_out; 
-    2'b10 : wave_out <= saw_out;
-    2'b11 : wave_out <= pulse_out;
+    2'b00, 2'b01 : waveform0 <= sin_out; 
+    2'b10 : waveform0 <= saw_out;
+    2'b11 : waveform0 <= pulse_out;
   endcase
 end
 

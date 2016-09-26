@@ -42,7 +42,7 @@ always @(posedge clk) begin
       rate_count <= rate_count + 1'b1;
     end else if (rate_count >= div_rate) begin
       nco_ctrl <= is_down ? nco_ctrl - inc_rate : nco_ctrl + inc_rate;
-      rate_count <= 32'h0;
+      rate_count <= 32'b0;
     end else
       rate_count <= rate_count + 1'b1;
     

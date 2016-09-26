@@ -31,7 +31,7 @@ NCO_fm NCO_fm0 (
 BlockAverager BlockAverager0 (
   .clk         ( clk         ), // input
   .phase       ( nco_phase   ), // input [31:0]
-	.sample_rate ( sample_rate ), // input [4:0]
+  .sample_rate ( sample_rate ), // input [4:0]
   .signal      ( demod       ), // input [15:0]
   .filtered    ( demodulated )  // output [15:0]
 );

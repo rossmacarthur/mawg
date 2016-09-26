@@ -1,4 +1,4 @@
-# Implementation Contraints File for Nexys4 DDR Artix-7 FPGA
+# Implementation Constraints File for Nexys4 DDR Artix-7 FPGA
 
 # Clock
 NET "CLK" LOC = E3 | IOSTANDARD = LVCMOS33;
@@ -13,7 +13,7 @@ NET "AUD_SD" LOC = D12 | IOSTANDARD = LVCMOS33 | TIG;
 
 # Pmod JA
 NET "JA1" LOC = C17 | IOSTANDARD = LVCMOS33 | TIG;
-NET "JA2"  LOC = D18 | IOSTANDARD = LVCMOS33 | TIG;
+NET "JA2" LOC = D18 | IOSTANDARD = LVCMOS33 | TIG;
 NET "JA4" LOC = G17 | IOSTANDARD = LVCMOS33 | TIG;
 
 # UART

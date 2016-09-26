@@ -53,40 +53,67 @@ class FloatRange(click.ParamType):
         return 'FloatRange(%r, %r)' % (self.min, self.max)
 
 
-def configure(cmd, data, port='/dev/ttyUSB1'):
+def configure(cmd, data, port='/dev/ttyUSB0'):
     ser = serial.Serial(port=port, baudrate=62500)
     ords = [cmd] + [(data >> 8*i) & 0xFF for i in range(3, -1, -1)]
     for x in ords:
         ser.write(chr(x))
-        # time.sleep(0.05)
+
+
+def note(freq, length):
+    configure(0x2, freq_to_ctrl(freq))
+    time.sleep(0.3*length)
 
 
 @click.group()
 def cli():
+    """
+    Command line script for configuring the MAWG.
+    """
     pass
 
 
 @cli.command()
 @click.argument('output', type=click.Choice(['message', 'modulated', 'demodulated']))
 def select(output):
+    """
+    Select output wave
+
+    OUTPUT is one of: message, modulated, demodulated
+    """
     configure(0x0, ['message', 'modulated', 'demodulated'].index(output))
 
 
 @cli.command()
 @click.argument('wave', type=click.Choice(['sine', 'chirp', 'sawtooth', 'pulse']))
 def set_wave(wave):
+    """
+    Set modulating wave
+
+    WAVE is one of: sine, chirp, sawtooth, pulse
+    """
     configure(0x1, ['sine', 'chirp', 'sawtooth', 'pulse'].index(wave))
 
 
 @cli.command()
 @click.argument('freq', type=float)
 def set_freq(freq):
+    """
+    Set the frequency of the output
+
+    FREQ is the frequency in Hertz
+    """
     configure(0x2, freq_to_ctrl(freq))
 
 
 @cli.command()
 @click.argument('freq', type=float)
 def sine(freq):
+    """
+    Configure and output a sine wave
+
+    FREQ is the frequency in Hertz
+    """
     configure(0x2, freq_to_ctrl(freq))
     configure(0x1, 0x0)
 
@@ -95,9 +122,17 @@ def sine(freq):
 @click.argument('min_freq', type=float)
 @click.argument('max_freq', type=float)
 @click.argument('length', type=float)
-@click.option('--delay', '-d', type=click.IntRange(0, 15), default=0)
-@click.option('--reverse', '-r', is_flag=True)
-def chirp(min_freq, max_freq, length, delay, reverse):
+@click.option('--delay', '-d', type=click.IntRange(0, 15), default=0, help='Number of chirp lengths to delay by')
+@click.option('--length_optimize', '-o', is_flag=True, help='Optimize for chirp length instead of smoothness')
+@click.option('--reverse', '-r', is_flag=True, help='Down chirp')
+def chirp(min_freq, max_freq, length, delay, length_optimize, reverse):
+    """
+    Configure and output a chirp
+
+    MIN_FREQ is the minimum frequency of sweep in Hertz,
+    MAX_FREQ is the maximum frequency of sweep in Hertz,
+    LENGTH is the length of the chirp in seconds
+    """
     min_ctrl = freq_to_ctrl(min_freq)
     max_ctrl = freq_to_ctrl(max_freq)
     configure(0x3, (1 if reverse else 0))
@@ -105,14 +140,23 @@ def chirp(min_freq, max_freq, length, delay, reverse):
     configure(0x5, min_ctrl)
     configure(0x6, max_ctrl)
     constants = chirp_constants(min_ctrl, max_ctrl, length)
-    configure(0x7, constants[2])
-    configure(0x8, constants[3])
+    if length_optimize:
+        configure(0x7, constants[2])
+        configure(0x8, constants[3])
+    else:
+        configure(0x7, constants[0])
+        configure(0x8, constants[1])
     configure(0x1, 0x1)
 
 
 @cli.command()
 @click.argument('freq', type=float, default=0)
 def sawtooth(freq):
+    """
+    Configure and output a sawtooth
+
+    FREQ is the frequency in Hertz
+    """
     if freq:
         configure(0x2, freq_to_ctrl(freq))
     configure(0x1, 0x2)
@@ -120,8 +164,14 @@ def sawtooth(freq):
 
 @cli.command()
 @click.argument('freq', type=float)
-@click.option('--duty', '-d', type=FloatRange(0, 1), default=0.5)
+@click.argument('duty', '-d', type=FloatRange(0, 1))
 def pulse(freq, duty):
+    """
+    Configure and output a pulse wave
+
+    FREQ is the frequency in Hertz,
+    DUTY is the duty cycle
+    """
     configure(0x2, freq_to_ctrl(freq))
     configure(0x9, disc(duty * (2**32-1)))
     configure(0x1, 0x3)
@@ -132,6 +182,12 @@ def pulse(freq, duty):
 @click.argument('dev_freq', type=float)
 @click.option('--demod_rate', '-r', type=BasedInt(), default='0x1d')
 def fm(ctr_freq, dev_freq, demod_rate):
+    """
+    Configure frequency modulation settings
+
+    CTR_FREQ is the center frequency in Hertz,
+    DEV_FREQ is the maximum frequency deviation in Hertz
+    """
     ctr_ctrl = freq_to_ctrl(ctr_freq)
     dev_ctrl = freq_to_ctrl(dev_freq)
     configure(0xC, demod_rate)
@@ -142,6 +198,9 @@ def fm(ctr_freq, dev_freq, demod_rate):
 
 @cli.command()
 def reset():
+    """
+    Reset all configuration values
+    """
     configure(0xF, 0x0)
 
 
@@ -149,18 +208,21 @@ def reset():
 @click.argument('cmd', type=BasedInt())
 @click.argument('data', type=BasedInt())
 def manual(cmd, data):
+    """
+    Manually send a command
+
+    CMD is the 8-bit command
+    DATA is the 32-bit data word to transmit
+    """
     configure(cmd, data)
-
-
-def note(freq, length):
-    configure(0x2, freq_to_ctrl(0.9*freq))
-    time.sleep(0.3*length)
 
 
 @cli.command()
 def fun():
-
-    configure(0x1, 0x3)
+    """
+    Plays a song
+    """
+    configure(0x1, 0x2)
 
     N = 0
     C1 = 523.25
@@ -170,22 +232,12 @@ def fun():
     G1 = 783.99
     A1 = 880.00
     B1 = 987.77
-
     C2 = 1046.50
     D2 = 1174.66
     E2 = 1318.51
     F2 = 1396.91
     G2 = 1567.98
     A2 = 1760.00
-    B2 = 1975.53
-    C3 = 2093.00
-    D3 = 2349.32
-    E3 = 2637.02
-    F3 = 2793.83
-    G3 = 3135.96
-    A3 = 3520.00
-    B3 = 3951.07
-    C4 = 4186.01
 
     while True:
         note(C2, 2)
