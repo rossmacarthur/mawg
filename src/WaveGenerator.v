@@ -1,42 +1,42 @@
 // Arbitrary waveform generator
 // Author: Ross MacArthur
-//   16-bit signed output amplitude
+//   M-bit signed output amplitude
 //   Four different waveforms:
 //     wave_sel at 0b00 generates sine and cosine at waveform0 and waveform1
 //     wave_sel at 0b01 generates chirp at waveform0
 //     wave_sel at 0b10 generates sawtooth at waveform0
 //     wave_sel at 0b11 generates pulse at waveform0
 
-module WaveGenerator (
+module WaveGenerator #(N = 32, M = 16)(
   input clk,
   input rst,
-  input [1:0] wave_sel,          // nco = 0b00, chirp = 0b01, sawtooth = 0b10, pulse = 0b11
-  input [31:0] freq_ctrl,        // frequency control word
-  input chirp_is_down,           // whether chirp is an up (0) or a down (1) chirp
-  input [3:0] chirp_delay,       // delay control between chirps
-  input [31:0] chirp_min_ctrl,   // minimum frequency control word
-  input [31:0] chirp_max_ctrl,   // maximum frequency control word
-  input [31:0] chirp_inc_rate,   // proportional frequency rate control word
-  input [31:0] chirp_div_rate,   // inversely proportional frequency rate control word
-  input [31:0] pulse_duty_cycle, // duty cycle of pulse waveform
-  output reg [15:0] waveform0,   // waveform output pins
-  output reg [15:0] waveform1    // second waveform output pins (only used to output cosine)
+  input [1:0] wave_sel,           // nco = 0b00, chirp = 0b01, sawtooth = 0b10, pulse = 0b11
+  input [N-1:0] freq_ctrl,        // frequency control word
+  input chirp_reverse,            // whether chirp is an up (0) or a down (1) chirp
+  input [7:0] chirp_delay,        // delay control between chirps
+  input [N-1:0] chirp_min_ctrl,   // minimum frequency control word
+  input [N-1:0] chirp_max_ctrl,   // maximum frequency control word
+  input [N-1:0] chirp_inc_rate,   // proportional frequency rate control word
+  input [N-1:0] chirp_div_rate,   // inversely proportional frequency rate control word
+  input [N-1:0] pulse_duty_cycle, // duty cycle of pulse waveform
+  output reg [M-1:0] waveform0,   // waveform output pins
+  output reg [M-1:0] waveform1    // second waveform output pins (only used to output cosine)
 );
 
 // Submodule inputs
 reg nco_reset;
-reg [31:0] nco_ctrl;
+reg [N-1:0] nco_ctrl;
 
 // Submodule outputs
 wire chirp_nco_reset;
-wire [31:0] chirp_nco_ctrl;
+wire [N-1:0] chirp_nco_ctrl;
 wire [15:0] sin_out;
 wire [15:0] cos_out;
-wire [15:0] saw_out;
-wire [15:0] pulse_out;
+wire [M-1:0] saw_out;
+wire [M-1:0] pulse_out;
 
 always @(posedge clk) begin
-  waveform1 <= (wave_sel == 2'b00) ? cos_out : 16'b0;
+  waveform1 <= (wave_sel == 2'b00) ? cos_out : {M{1'b0}};
   nco_ctrl <= wave_sel[0] ? chirp_nco_ctrl : freq_ctrl;
   nco_reset <= wave_sel[0] ? chirp_nco_reset : rst;
   case(wave_sel)
@@ -47,40 +47,40 @@ always @(posedge clk) begin
 end
 
 // Connect up modules
-NCO NCO0 (
+NCO #(.N(N)) NCO0 (
   .clk     ( clk       ), // input
   .rst     ( nco_reset ), // input
-  .ctrl    ( nco_ctrl  ), // input [31:0]
+  .ctrl    ( nco_ctrl  ), // input [N-1:0]
   .sin_out ( sin_out   ), // output [15:0]
   .cos_out ( cos_out   )  // output [15:0]
 );
 
-Chirp Chirp0 (
+Chirp #(.N(N)) Chirp0 (
   .clk       ( clk             ), // input
   .rst       ( rst             ), // input
-  .delay     ( chirp_delay     ), // input [3:0]
-  .is_down   ( chirp_is_down   ), // input
-  .min_ctrl  ( chirp_min_ctrl  ), // input [31:0]
-  .max_ctrl  ( chirp_max_ctrl  ), // input [31:0]
-  .inc_rate  ( chirp_inc_rate  ), // input [31:0]
-  .div_rate  ( chirp_div_rate  ), // input [31:0]
+  .delay     ( chirp_delay     ), // input [7:0]
+  .reverse   ( chirp_revrse    ), // input
+  .min_ctrl  ( chirp_min_ctrl  ), // input [N-1:0]
+  .max_ctrl  ( chirp_max_ctrl  ), // input [N-1:0]
+  .inc_rate  ( chirp_inc_rate  ), // input [N-1:0]
+  .div_rate  ( chirp_div_rate  ), // input [N-1:0]
   .nco_reset ( chirp_nco_reset ), // output
-  .nco_ctrl  ( chirp_nco_ctrl  )  // output [31:0]
+  .nco_ctrl  ( chirp_nco_ctrl  )  // output [N-1:0]
 );
 
-Sawtooth Sawtooth0 (
+Sawtooth #(.N(N), .M(M)) Sawtooth0 (
   .clk   ( clk       ), // input
   .rst   ( rst       ), // input
-  .ctrl  ( freq_ctrl ), // input [31:0]
-  .value ( saw_out   )  // input [15:0]
+  .ctrl  ( freq_ctrl ), // input [N-1:0]
+  .value ( saw_out   )  // input [M-1:0]
 );
 
-Pulse Pulse0 (
+Pulse #(.N(N), .M(M)) Pulse0 (
   .clk   ( clk              ), // input
   .rst   ( rst              ), // input  
-  .ctrl  ( freq_ctrl        ), // input [31:0]
-  .duty  ( pulse_duty_cycle ), // input [31:0]
-  .value ( pulse_out        )  // output [15:0]
+  .ctrl  ( freq_ctrl        ), // input [N-1:0]
+  .duty  ( pulse_duty_cycle ), // input [N-1:0]
+  .value ( pulse_out        )  // output [M-1:0]
 );
 
 endmodule

@@ -27,8 +27,8 @@ wire uart_busy;
 reg [1:0] mawg_out;
 reg [1:0] mawg_wave;
 reg [31:0] mawg_ctrl;
-reg mawg_chirp_is_down;
-reg [3:0] mawg_chirp_delay ;
+reg mawg_chirp_reverse;
+reg [7:0] mawg_chirp_delay ;
 reg [31:0] mawg_chirp_min_ctrl;
 reg [31:0] mawg_chirp_max_ctrl;
 reg [31:0] mawg_chirp_inc_rate;
@@ -47,8 +47,8 @@ always @(posedge CLK_1M) begin
     mawg_out <= 2'b0;
     mawg_wave <= 2'b0;
     mawg_ctrl <= 32'b0;
-    mawg_chirp_is_down <= 1'b0;
-    mawg_chirp_delay <= 4'b0;
+    mawg_chirp_reverse <= 1'b0;
+    mawg_chirp_delay <= 8'b0;
     mawg_chirp_min_ctrl <= 32'b0;
     mawg_chirp_max_ctrl <= 32'b0;
     mawg_chirp_inc_rate <= 32'b0;
@@ -76,9 +76,9 @@ always @(posedge CLK_1M) begin
         else if (cmd == 8'd2)
           mawg_ctrl <= { buff[23:0], uart_data };
         else if (cmd == 8'd3)
-          mawg_chirp_is_down <= uart_data[0];
+          mawg_chirp_reverse <= uart_data[0];
         else if (cmd == 8'd4)
-          mawg_chirp_delay <= uart_data[3:0];
+          mawg_chirp_delay <= uart_data;
         else if (cmd == 8'd5)
           mawg_chirp_min_ctrl <= { buff[23:0], uart_data };
         else if (cmd == 8'd6)
@@ -99,8 +99,8 @@ always @(posedge CLK_1M) begin
           mawg_out <= 2'b0;
           mawg_wave <= 2'b0;
           mawg_ctrl <= 32'b0;
-          mawg_chirp_is_down <= 1'b0;
-          mawg_chirp_delay <= 4'b0;
+          mawg_chirp_reverse <= 1'b0;
+          mawg_chirp_delay <= 8'b0;
           mawg_chirp_min_ctrl <= 32'b0;
           mawg_chirp_max_ctrl <= 32'b0;
           mawg_chirp_inc_rate <= 32'b0;
@@ -151,7 +151,7 @@ MAWG MAWG0 (
   .out_sel          ( mawg_out               ), // input [1:0]
   .wave_sel         ( mawg_wave              ), // input [1:0]
   .freq_ctrl        ( mawg_ctrl              ), // input [31:0]
-  .chirp_is_down    ( mawg_chirp_is_down     ), // input
+  .chirp_reverse    ( mawg_chirp_reverse     ), // input
   .chirp_delay      ( mawg_chirp_delay       ), // input [3:0]
   .chirp_min_ctrl   ( mawg_chirp_min_ctrl    ), // input [31:0]
   .chirp_max_ctrl   ( mawg_chirp_max_ctrl    ), // input [31:0]

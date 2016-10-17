@@ -10,8 +10,8 @@ module MAWG (
   input [1:0] out_sel,           // waveform = 0b00, modulated = 0b01, demodulated = 0b10
   input [1:0] wave_sel,          // nco = 0b00, chirp = 0b01, sawtooth = 0b10, pulse = 0b11
   input [31:0] freq_ctrl,        // frequency control word
-  input chirp_is_down,           // whether chirp is an up (0) or a down (1) chirp
-  input [3:0] chirp_delay,       // delay control between chirps
+  input chirp_reverse,           // whether chirp is an up (0) or a down (1) chirp
+  input [7:0] chirp_delay,       // delay control between chirps
   input [31:0] chirp_min_ctrl,   // minimum frequency control word
   input [31:0] chirp_max_ctrl,   // maximum frequency control word
   input [31:0] chirp_inc_rate,   // proportional frequency rate control word
@@ -48,7 +48,7 @@ WaveGenerator WaveGenerator0 (
   .rst              ( rst              ), // input
   .wave_sel         ( wave_sel         ), // input [1:0]
   .freq_ctrl        ( freq_ctrl        ), // input [31:0]
-  .chirp_is_down    ( chirp_is_down    ), // input
+  .chirp_reverse    ( chirp_reverse    ), // input
   .chirp_delay      ( chirp_delay      ), // input [3:0]
   .chirp_min_ctrl   ( chirp_min_ctrl   ), // input [31:0]
   .chirp_max_ctrl   ( chirp_max_ctrl   ), // input [31:0]

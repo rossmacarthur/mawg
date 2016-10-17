@@ -2,23 +2,23 @@
 // Phase incremented, quarter LUT, Numerically Controlled Oscillator
 // Author: Ross MacArthur
 //   16-bit signed output amplitude
-//   32-bit input frequency control
+//   N-bit input frequency control
 //   frequency = clk * ctrl / 2^32
 
-module NCO (
+module NCO #(N = 32)(
   input clk,
   input rst,
-  input [31:0] ctrl,         // frequency control word
+  input [N-1:0] ctrl,        // frequency control word
   output reg [15:0] sin_out, // signed amplitude of sine wave
   output reg [15:0] cos_out  // signed amplitude of cosine wave
 );
 
 // Phase Accumulator
-reg [31:0] phase;
+reg [N-1:0] phase;
 
 always @(posedge clk) begin
   if (rst)
-    phase <= 32'b0;
+    phase <= {N{1'b0}};
   else
     phase <= phase + ctrl;
 end
@@ -30,14 +30,14 @@ reg [15:0] sin_lut_val;
 reg [15:0] cos_lut_val;
 
 always @(*) begin
-  sin_lut_sel <= phase[30] ? ~(phase[29:24]-1'b1) : phase[29:24];
-  cos_lut_sel <= phase[30] ? ~(phase[29:24]-1'b1) : phase[29:24];
-  if (phase[30] & ~|phase[29:24]) begin
-    sin_out <= phase[31] ? 16'b10000000_00000001 : 16'b01111111_11111111;
+  sin_lut_sel <= phase[N-2] ? ~(phase[N-3:N-8]-1'b1) : phase[N-3:N-8];
+  cos_lut_sel <= phase[N-2] ? ~(phase[N-3:N-8]-1'b1) : phase[N-3:N-8];
+  if (phase[N-2] & ~|phase[N-3:N-8]) begin
+    sin_out <= phase[N-1] ? 16'b10000000_00000001 : 16'b01111111_11111111;
     cos_out <= 16'b0;
   end else begin
-    sin_out <= phase[31] ? (~sin_lut_val+1'b1) : sin_lut_val;
-    cos_out <= (phase[31]^phase[30]) ? (~cos_lut_val+1'b1) : cos_lut_val;
+    sin_out <= phase[N-1] ? (~sin_lut_val+1'b1) : sin_lut_val;
+    cos_out <= (phase[N-1]^phase[N-2]) ? (~cos_lut_val+1'b1) : cos_lut_val;
   end
   
   case(sin_lut_sel)

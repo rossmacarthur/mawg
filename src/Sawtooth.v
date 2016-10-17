@@ -1,25 +1,25 @@
 // Sawtooth wave generator
 // Author: Ross MacArthur
-//   16-bit signed output amplitude
-//   32-bit input frequency control
+//   N-bit input frequency control
+//   M-bit signed output amplitude
 //   frequency = clk * ctrl / 2^32
 
-module Sawtooth (
+module Sawtooth #(N = 32, M = 16)(
   input clk,
   input rst,
-  input [31:0] ctrl,      // frequency control word
-  output reg [15:0] value // signed amplitude of sawtooth wave
+  input [N-1:0] ctrl,      // frequency control word
+  output reg [M-1:0] value // signed amplitude of sawtooth wave
 );
 
-reg [31:0] phase;
+reg [N-1:0] phase;
 
 always @(posedge clk) begin
   if (rst) begin
-    phase <= 32'b0;
-    value <= 16'b0;
+    phase <= {N{1'b0}};
+    value <= {M{1'b0}};
   end else begin
     phase <= phase + ctrl;
-    value <= {~phase[31], phase[30:16]};
+    value <= {~phase[N-1], phase[N-2:M]};
   end
 end
 
