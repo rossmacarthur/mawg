@@ -1,24 +1,22 @@
 module Main (
-  input CLK,
-  input TXD,              // UART receive pin
+  input CLK100MHZ,
+  input UART_TXD_IN,      // UART receive pin
   input BTNC,             // Reset button
   output AUD_PWM,         // Audio jack PWM 
   output reg AUD_SD=1'b1, // Audio jack filter
-  output JA1,             // PmodDA4 pin 1
-  output JA2,             // PmodDA4 pin 2
-  output JA4              // PmodDA4 pin 4
+  output [4:1] JA         // Header for PmodDA4
 );
 
 // Reset and clocks
 wire btn_rst;
-wire CLK_100M;
-wire CLK_75M;
-wire CLK_16M;
-wire CLK_1M;
+wire CLK_100MHZ;
+wire CLK_75MHZ;
+wire CLK_16MHZ;
+wire CLK_1MHZ;
 
 reg [3:0] counter;
-assign CLK_1M = counter[3];
-always @(posedge CLK_16M) counter <= counter + 1'b1;
+assign CLK_1MHZ = counter[3];
+always @(posedge CLK_16MHZ) counter <= counter + 1'b1;
 
 // Receive new config via UART
 wire [7:0] uart_data;
@@ -42,7 +40,7 @@ reg [2:0] state;
 reg [7:0] cmd;
 reg [31:0] buff;
 
-always @(posedge CLK_1M) begin
+always @(posedge CLK_1MHZ) begin
   if (btn_rst) begin
     mawg_out <= 2'b0;
     mawg_wave <= 2'b0;
@@ -125,28 +123,28 @@ assign to_audio = {~signal0[15], signal0[14:8]};
 
 // Connect up modules
 ClockGenerator ClockGenerator0 (
-  .CLK_IN1  ( CLK      ), // input
-  .CLK_OUT1 ( CLK_100M ), // output
-  .CLK_OUT2 ( CLK_75M  ), // output
-  .CLK_OUT3 ( CLK_16M  )  // output
+  .CLK_IN1  ( CLK100MHZ   ), // input
+  .CLK_OUT1 ( CLK_100MHZ  ), // output
+  .CLK_OUT2 ( CLK_75MHZ   ), // output
+  .CLK_OUT3 ( CLK_16MHZ   )  // output
 );
 
 Debounce Debounce0 (
-  .clk       ( CLK_100M ), // input
-  .noisy     ( BTNC     ), // input
-  .debounced ( btn_rst  )  // output
+  .clk       ( CLK_100MHZ ), // input
+  .noisy     ( BTNC       ), // input
+  .debounced ( btn_rst    )  // output
 );
 
 UART_RX UART_RX0 (
-  .clk  ( CLK_1M    ), // input 
-  .rst  ( btn_rst   ), // input
-  .RX   ( TXD       ), // input
-  .busy ( uart_busy ), // output
-  .data ( uart_data )  // output [7:0]
+  .clk  ( CLK_1MHZ    ), // input 
+  .rst  ( btn_rst     ), // input
+  .RX   ( UART_TXD_IN ), // input
+  .busy ( uart_busy   ), // output
+  .data ( uart_data   )  // output [7:0]
 );
 
 MAWG MAWG0 (
-  .clk              ( CLK_100M               ), // input
+  .clk              ( CLK_100MHZ             ), // input
   .rst              ( btn_rst                ), // input
   .out_sel          ( mawg_out               ), // input [1:0]
   .wave_sel         ( mawg_wave              ), // input [1:0]
@@ -166,19 +164,19 @@ MAWG MAWG0 (
 );
 
 PmodDA4_Control PmodDA4_Control0 (
-  .clk   ( CLK_75M ), // input
-  .rst   ( btn_rst ), // input
-  .value ( to_pmod ), // input [11:0]
-  .SYNC  ( JA1     ), // output
-  .DATA  ( JA2     ), // output
-  .SCLK  ( JA4     )  // output
+  .clk   ( CLK_75MHZ ), // input
+  .rst   ( btn_rst   ), // input
+  .value ( to_pmod   ), // input [11:0]
+  .SYNC  ( JA[1]     ), // output
+  .DATA  ( JA[2]     ), // output
+  .SCLK  ( JA[4]     )  // output
 );
 
 Audio_Control Audio_Control0 (
-  .clk     ( CLK_100M ), // input
-  .rst     ( btn_rst  ), // input
-  .value   ( to_audio ), // input [7:0]
-  .AUD_PWM ( AUD_PWM  )  // output
+  .clk     ( CLK_100MHZ ), // input
+  .rst     ( btn_rst    ), // input
+  .value   ( to_audio   ), // input [7:0]
+  .AUD_PWM ( AUD_PWM    )  // output
 );
 
 endmodule

@@ -2,9 +2,9 @@
 
 _Modulation and Arbitrary Waveform Generator for an FPGA_
 
-My final undergraduate thesis project. The implementation is targeted to a Nexys4 DDR Artix-7 FPGA and was developed using Xilinx ISE.
+My final undergraduate thesis project. The Verilog source code is accompanied by a Vivado project file and a Xilinx Design Constraint (XDC) file targeted to a Nexys4 DDR Artix-7 FPGA.
 
-This project involves developing efficient, flexible and parameterizable cores that would be used for larger FPGA projects, specifically SDR applications such as radar, telecommunications, and cognitive radio.
+This project involves developing efficient, flexible and parameterisable cores that would be used for larger FPGA projects, specifically SDR applications such as radar, telecommunications, and cognitive radio.
 
 
 ## Modes of operation

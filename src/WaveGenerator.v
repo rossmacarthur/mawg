@@ -59,7 +59,7 @@ Chirp #(.N(N)) Chirp0 (
   .clk       ( clk             ), // input
   .rst       ( rst             ), // input
   .delay     ( chirp_delay     ), // input [7:0]
-  .reverse   ( chirp_revrse    ), // input
+  .reverse   ( chirp_reverse   ), // input
   .min_ctrl  ( chirp_min_ctrl  ), // input [N-1:0]
   .max_ctrl  ( chirp_max_ctrl  ), // input [N-1:0]
   .inc_rate  ( chirp_inc_rate  ), // input [N-1:0]
