@@ -6,6 +6,9 @@ My final undergraduate thesis project. The Verilog source code is accompanied by
 
 This project involves developing efficient, flexible and parameterisable cores that would be used for larger FPGA projects, specifically SDR applications such as radar, telecommunications, and cognitive radio.
 
+View the write up [here →][thesis].
+
+[thesis]: https://mega.nz/file/y9kgjZwa#wicZXJYcp9pGFkvCjlcnuW-tQZew453F6RFk3n2VrGw
 
 ## Modes of operation
 
